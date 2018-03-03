@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.mybatis.AuthPerDao">
+	<select id="findAllAuthPerByUser" parameterType="java.lang.Long">
+		select p.per_url from auth_user u,auth_role r,auth_user_role ur,auth_per
+		p,auth_role_per rp
+		where ur.u_id=u.id and ur.r_id=r.id and rp.r_id = r.id and rp.p_id=p.id
+		and u.id=#{userId}
+	</select>
+</mapper>

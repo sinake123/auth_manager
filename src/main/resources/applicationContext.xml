@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans   
+    http://www.springframework.org/schema/beans/spring-beans.xsd   
+    http://www.springframework.org/schema/tx   
+    http://www.springframework.org/schema/tx/spring-tx.xsd  
+    http://www.springframework.org/schema/aop    
+    http://www.springframework.org/schema/aop/spring-aop.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd">
+	<description>Spring公共配置</description>
+	<context:annotation-config />
+	<!-- 启用aop注解支持 -->
+	<aop:aspectj-autoproxy/>
+	<context:component-scan base-package="com.auth.modules.*.service,com.auth.common.aop" />
+	<import resource="classpath:datasource/datasource.xml"/>
+
+		<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+			<property name="dataSource" ref="dataSource" />
+			<property name="configLocation" value="classpath:mybatis/mybatis-config.xml" />
+			<property name="mapperLocations" value="classpath:mybatis/mapper/*.xml" />
+		</bean>
+
+		<bean class="tk.mybatis.spring.mapper.MapperScannerConfigurer">
+			<property name="basePackage" value="com.auth.mybatis,com.auth.modules.*.dao" />
+			<!-- <property name="markerInterfaces" value="tk.mybatis.mapper.common.Mapper"/> -->
+			<property name="annotationClass" value="com.auth.common.annotation.MybatisRepository" />
+			<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+		</bean>
+
+		<bean id="transactionManager"
+			class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+			<property name="dataSource" ref="dataSource" />
+		</bean>
+		<!-- MANDATORY:强制以事务方式执行，如果当前方法不在事务中，那么会抛出异常。 -->
+
+		<!-- REQUIRED:如果当前方法已经在事务中，那么就以父事务执行，不需要新建事务； 如果当前方法不在事务中，那么就为当前方法新建事务。回滚情况： 
+			父子方法中任何地方出现问题，都会全部回滚。 -->
+
+		<!-- SUPPORTS:如果当前方法已经在事务中，那么就以当前事务执行，如果当前方法不再事务中 ，那么就以非事务方式运行。如果运行在事务中，那么只要出现异常都会回滚 -->
+		<!-- NEVER:与MANDATORY相反，强制以非事务方式执行，如果当前方法在事务中，那么会抛出异常。 -->
+		<tx:advice id="transAdvice" transaction-manager="transactionManager">
+			<tx:attributes>
+				<tx:method name="delete*" propagation="REQUIRED"
+					read-only="false" rollback-for="java.lang.Exception"
+					no-rollback-for="java.lang.RuntimeException" />
+				<tx:method name="update*" propagation="REQUIRED"
+					read-only="false" rollback-for="java.lang.Exception"
+					no-rollback-for="java.lang.RuntimeException" />
+				<tx:method name="insert*" propagation="REQUIRED"
+					read-only="false" rollback-for="java.lang.Exception"
+					no-rollback-for="java.lang.RuntimeException" />
+				<tx:method name="select*" propagation="SUPPORTS"
+					read-only="false" rollback-for="java.lang.Exception"
+					no-rollback-for="java.lang.RuntimeException" />
+			</tx:attributes>
+		</tx:advice>
+		<aop:config>
+			<aop:pointcut id="txPoint"
+				expression="execution(public * com.auth.modules.*.service.impl.*.*(..))" />
+			<aop:advisor advice-ref="transAdvice" pointcut-ref="txPoint" />
+		</aop:config>
+		<import resource="classpath:shiro/spring-shiro.xml" />
+</beans>

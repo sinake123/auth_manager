@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.modules.menu.dao.AuthMenuDao">
+	<resultMap id="authMenuBo" type="com.auth.modules.menu.entity.AuthMenuBo">
+		<result property="id" column="id" />
+		<result property="parentId" column="parent_id" />
+		<result property="name" column="name" />
+		<result property="per" column="per" />
+		<result property="url" column="url" />
+		<result property="type" column="type" />
+		<result property="icon" column="icon" />
+		<result property="orderNum" column="order_num" />
+	</resultMap>
+</mapper>
